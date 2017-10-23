@@ -52,8 +52,8 @@ public class Main {
 
        /* Bcon bcon = new Main.Bcon();
         Thread t4 = new Thread(bcon);
-        t4.start();*/
-
+        t4.start();
+*/
     }
 
 
@@ -83,8 +83,8 @@ public class Main {
 
         @Override
         public void run() {
+            String b_topic_name = props.getProperty("b_topic_name");
 
-            String S_topic_name = props.getProperty("S_topic_name");
             props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
             props.put("acks", "all");
             props.put("retries", 0);
@@ -100,36 +100,28 @@ public class Main {
 
                 Calendar c = Calendar.getInstance();
                 SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                producer.send(new ProducerRecord<>(S_topic_name, Integer.toString(i), f.format(c.getTime())));
+                producer.send(new ProducerRecord<>(b_topic_name, Integer.toString(i), f.format(c.getTime())));
                 i++;
 
                 try {
-
-
                     Thread.sleep(1000);
-
-
                 } catch (InterruptedException e) {
-
                     e.printStackTrace();
                 }
                 producer.close();
             }
-
-
         }
-
     }
 
     static abstract class Acon implements Callable<String> {
 
 
-        public static void main(String[] args) {
+        public static void getTime() {
             Callable<String> callable = new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    String b_topic_name = props.getProperty("b_topic_name");
-                    //String S_topic_name = props.getProperty("S_topic_name");
+
+                    String S_topic_name = props.getProperty("S_topic_name");
                     props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
                     props.put("group.id", "aconsumer");
                     props.put("enable.auto.commit", "true");
@@ -138,23 +130,21 @@ public class Main {
                     props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
                     KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 
-                    consumer.subscribe(Arrays.asList(b_topic_name));
+                    consumer.subscribe(Arrays.asList(S_topic_name));
                     String s = null;
-                    while (true) {
+                    if (s == null) {
                         ConsumerRecords<String, String> records = consumer.poll(10);
                         for (ConsumerRecord<String, String> record : records) {
                             s = record.value();
                         }
-                        System.out.println("**");
-                        return s;
-                    }
+                    }return s ;
                 }
             };
             FutureTask<String> future = new FutureTask<String>(callable);
             new Thread(future).start();
             try {
                 String b_topic_name = props.getProperty("b_topic_name");
-                String S_topic_name = props.getProperty("S_topic_name");
+
                 props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
                 props.put("group.id", future.get());
                 props.put("enable.auto.commit", "true");
@@ -176,7 +166,7 @@ public class Main {
             }
         }
     }
-}
+
 
 
       /*  @Override
@@ -215,27 +205,46 @@ public class Main {
 
 
 
-    /*static class Bcon implements Runnable {
+   /* static class Bcon implements Runnable {
 
         @Override
         public void run() {
-            *//*String b_topic_name = props.getProperty("b_topic_name");
-            String S_topic_name = props.getProperty("S_topic_name");
+            String b_topic_name = props.getProperty("b_topic_name");
             props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
-            props.put("group.id", s);
+            props.put("group.id", "aconsumer");
             props.put("enable.auto.commit", "true");
             props.put("auto.commit.interval.ms", "1000");
             props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
             consumer.subscribe(Arrays.asList(b_topic_name));
+            String s = null;
+            while (true) {
+                ConsumerRecords<String, String> records = consumer.poll(10);
+                for (ConsumerRecord<String, String> record : records) {
+                    s = record.value();
+                }
+
+            }
+
+
+          // String b_topic_name = props.getProperty("b_topic_name");
+          //  String S_topic_name = props.getProperty("S_topic_name");
+           // props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
+           // props.put("group.id", s);
+           // props.put("enable.auto.commit", "true");
+            //props.put("auto.commit.interval.ms", "1000");
+          //  props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+            //props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+            KafkaConsumer<String, String> consumer1 = new KafkaConsumer<>(props);
+            consumer1.subscribe(Arrays.asList(b_topic_name));
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(10);
                 for (ConsumerRecord<String, String> record : records) {
                     System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                 }
-            }*//*
+            }
         }
-    }
+    }*/
 }
-*/
