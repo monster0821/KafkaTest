@@ -7,7 +7,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import javax.naming.Name;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -100,7 +99,6 @@ public class Main {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }
@@ -123,10 +121,10 @@ public class Main {
             while (true) {
 
                 ConsumerRecords<String, String> records = consumer.poll(10);
-                boolean flag= true;
+                boolean flag = true;
                 for (ConsumerRecord<String, String> record : records) {
                     name = record.value();
-                    if (name != null){
+                    if (name != null) {
                         Bcon bcon = new Main.Bcon(name);
                         Thread t4 = new Thread(bcon);
                         t4.start();
@@ -137,33 +135,33 @@ public class Main {
     }
 
 
-        static class Bcon implements Runnable {
+    static class Bcon implements Runnable {
 
-            private String name;
-            public Bcon(String name) {
-                this.name = name;
-            }
+        private String name;
 
-            @Override
-            public void run() {
-                Acon acon = new Acon();
-                String b_topic_name = props.getProperty("b_topic_name");
-                props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
-                props.put("group.id", this.name);
-                props.put("enable.auto.commit", "true");
-                props.put("auto.commit.interval.ms", "1000");
-                props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-                props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-                KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-                consumer.subscribe(Arrays.asList(b_topic_name));
-                while (true) {
-                    ConsumerRecords<String, String> records = consumer.poll(10);
-                    for (ConsumerRecord<String, String> record : records) {
-                        System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
-                    }
+        public Bcon(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void run() {
+            Acon acon = new Acon();
+            String b_topic_name = props.getProperty("b_topic_name");
+            props.put("bootstrap.servers", "cityos3:9092,cityos4:9092,cityos5:9092");
+            props.put("group.id", this.name);
+            props.put("enable.auto.commit", "true");
+            props.put("auto.commit.interval.ms", "1000");
+            props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+            props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+            KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+            consumer.subscribe(Arrays.asList(b_topic_name));
+            while (true) {
+                ConsumerRecords<String, String> records = consumer.poll(10);
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                 }
             }
         }
-
     }
+}
 
